@@ -244,6 +244,7 @@ const ARCHITECTURE_EDGES = [
 const SIMULATION_STAGES = [
   {
     step: 1,
+    shortLabel: 'Fault Injected',
     title: 'Synthetic Fault Injected in Production Service',
     description: 'Chaos Lab initiates a controlled memory leak and N+1 query loop on checkout-service (commit a1f3). Heap RSS climbs rapidly.',
     activeNodes: ['chaos', 'prom'],
@@ -260,6 +261,7 @@ const SIMULATION_STAGES = [
   },
   {
     step: 2,
+    shortLabel: 'Zero-LLM Gate',
     title: 'Statistical Anomaly Detected Without LLM',
     description: 'Scheduled Monitor Workflow executes EWMA & Z-Score evaluation over Prometheus scrapes. Z-Score breaches 4.8σ; anomaly confirmed.',
     activeNodes: ['prom', 'loki'],
@@ -276,6 +278,7 @@ const SIMULATION_STAGES = [
   },
   {
     step: 3,
+    shortLabel: 'Temporal Start',
     title: 'Temporal Incident Workflow Initialized',
     description: 'Durable IncidentWorkflow starts with fingerprint deduplication. Temporal schedules parallel investigation activities.',
     activeNodes: ['loki', 'temporal'],
@@ -292,6 +295,7 @@ const SIMULATION_STAGES = [
   },
   {
     step: 4,
+    shortLabel: 'Slack Report',
     title: 'Initial Incident Report Dispatched to Slack',
     description: 'Under 90 seconds from onset: Slack #oncall receives initial triage report with severity classification (SEV2) and affected service.',
     activeNodes: ['temporal', 'slack'],
@@ -308,6 +312,7 @@ const SIMULATION_STAGES = [
   },
   {
     step: 5,
+    shortLabel: 'ADK Agents',
     title: 'Google ADK Multi-Agent Cluster Investigation',
     description: 'Metrics Agent, Logs Agent, and Changes Agent run in parallel. Commit a1f3 "optimize order retrieval" is identified as culprit.',
     activeNodes: ['temporal', 'adk'],
@@ -324,6 +329,7 @@ const SIMULATION_STAGES = [
   },
   {
     step: 6,
+    shortLabel: 'GPU Synthesis',
     title: 'Supermemory Recall & JarvisLabs GPU Inference',
     description: 'Supermemory retrieves past resolution from incident #142. JarvisLabs H100 GPU generates minimal LRU cache bounded fix proposal.',
     activeNodes: ['adk', 'gem', 'mem'],
@@ -340,6 +346,7 @@ const SIMULATION_STAGES = [
   },
   {
     step: 7,
+    shortLabel: 'Docker Sandbox',
     title: 'Docker Sandbox Ephemeral Patch Verification',
     description: 'Docker container spins up with proposed patch. Failing traffic replayed. All 42 unit and performance load tests pass. Verdict: PASS.',
     activeNodes: ['temporal', 'docker'],
@@ -360,6 +367,7 @@ const SIMULATION_STAGES = [
   },
   {
     step: 8,
+    shortLabel: 'Draft PR Open',
     title: 'Automated Draft Pull Request Opened on GitHub',
     description: 'Draft PR #214 generated with verified code diff, sandbox benchmark logs, and Post-Mortem checklist. Never auto-merges.',
     activeNodes: ['docker', 'github'],
@@ -380,6 +388,7 @@ const SIMULATION_STAGES = [
   },
   {
     step: 9,
+    shortLabel: 'SRE Approval',
     title: 'Human-in-the-Loop SRE Approves Remediation',
     description: 'On-call SRE reviews the diff and test proof in Slack, clicking "Approve Fix". Temporal receives durable signal approve_fix().',
     activeNodes: ['dev', 'api', 'temporal'],
@@ -400,6 +409,7 @@ const SIMULATION_STAGES = [
   },
   {
     step: 10,
+    shortLabel: 'Memory Learned',
     title: 'Baseline Recovery Verified & Knowledge Learned',
     description: 'Metrics hold at healthy baseline for 10 consecutive minutes. Resolution & approved diff written to Supermemory vector store.',
     activeNodes: ['temporal', 'mem', 'slack'],
@@ -820,7 +830,7 @@ class IncidentEngine {
     this.topology = topologyRenderer;
     this.metrics = metricsChart;
     this.currentIndex = 0;
-    this.isPlaying = false; // Start in manual control mode!
+    this.isPlaying = false; // Start in manual control mode: user has 100% control!
     this.speedMultiplier = 1;
     this.timer = null;
 
@@ -835,32 +845,62 @@ class IncidentEngine {
     this.githubPrCardEl = document.getElementById('github-pr-card');
     this.prDiffEl = document.getElementById('pr-diff-content');
     this.playBtnEl = document.getElementById('play-btn');
+    this.prevBtnEl = document.getElementById('prev-btn');
+    this.nextBtnEl = document.getElementById('next-btn');
+    this.resetBtnEl = document.getElementById('reset-btn');
     this.timelineStepperEl = document.getElementById('stepper-timeline');
     this.gpuActivityMeterEl = document.getElementById('gpu-activity-meter');
 
-    // UI Element Cache - Topology Section
+    // UI Element Cache - Topology Interactive Console & Canvas
     this.topoStepCounterEl = document.getElementById('topo-step-counter');
+    this.topoStepBadgeEl = document.getElementById('topo-step-badge');
+    this.topoModePillEl = document.getElementById('topo-mode-pill');
     this.topoStepTitleEl = document.getElementById('topo-step-title');
+    this.topoStepDescEl = document.getElementById('topo-step-desc');
+    this.topoFlowTextEl = document.getElementById('topo-flow-text');
+    this.topoScrubberEl = document.getElementById('topo-scrubber-pills');
     this.topoPlayBtnEl = document.getElementById('topo-play-btn');
     this.topoPrevBtnEl = document.getElementById('topo-prev-btn');
     this.topoNextBtnEl = document.getElementById('topo-next-btn');
-    this.topoStepperEl = document.getElementById('topo-stepper-timeline');
+    this.topoResetBtnEl = document.getElementById('topo-reset-btn');
+    this.canvasPrevBtnEl = document.getElementById('canvas-prev-btn');
+    this.canvasNextBtnEl = document.getElementById('canvas-next-btn');
 
     this.init();
   }
 
   init() {
-    this.renderStepperDots();
+    this.renderScrubbersAndDots();
     this.bindControls();
     this.renderGpuMeter();
     this.goToStep(0);
-    this.pause(); // Ensure initial state is cleanly paused for user control
+    this.pause(); // Ensure initial state is cleanly paused for user control!
   }
 
-  renderStepperDots() {
-    [this.timelineStepperEl, this.topoStepperEl].forEach(container => {
-      if (!container) return;
-      container.innerHTML = '';
+  renderScrubbersAndDots() {
+    // 1. Render 10 Scrubber Pills on Topology Console
+    if (this.topoScrubberEl) {
+      this.topoScrubberEl.innerHTML = '';
+      SIMULATION_STAGES.forEach((stage, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'topo-scrubber-btn';
+        btn.setAttribute('type', 'button');
+        btn.setAttribute('title', `Step ${stage.step}: ${stage.title}`);
+        btn.innerHTML = `
+          <span class="scrubber-num">${String(stage.step).padStart(2, '0')}</span>
+          <span class="scrubber-label">${stage.shortLabel || stage.title}</span>
+        `;
+        btn.addEventListener('click', () => {
+          this.pause();
+          this.goToStep(idx);
+        });
+        this.topoScrubberEl.appendChild(btn);
+      });
+    }
+
+    // 2. Render dots on Simulator Stepper Timeline
+    if (this.timelineStepperEl) {
+      this.timelineStepperEl.innerHTML = '';
       SIMULATION_STAGES.forEach((stage, idx) => {
         const dot = document.createElement('div');
         dot.className = 'step-indicator';
@@ -869,9 +909,9 @@ class IncidentEngine {
           this.pause();
           this.goToStep(idx);
         });
-        container.appendChild(dot);
+        this.timelineStepperEl.appendChild(dot);
       });
-    });
+    }
   }
 
   renderGpuMeter() {
@@ -897,9 +937,6 @@ class IncidentEngine {
   }
 
   bindControls() {
-    const prevBtn = document.getElementById('prev-btn');
-    const nextBtn = document.getElementById('next-btn');
-    const resetBtn = document.getElementById('reset-btn');
     const speed1x = document.getElementById('speed-1x');
     const speed2x = document.getElementById('speed-2x');
 
@@ -918,19 +955,26 @@ class IncidentEngine {
       else this.play();
     };
 
-    // Bind Simulator controls
-    if (this.playBtnEl) this.playBtnEl.addEventListener('click', handlePlayToggle);
-    if (prevBtn) prevBtn.addEventListener('click', handlePrev);
-    if (nextBtn) nextBtn.addEventListener('click', handleNext);
-    if (resetBtn) resetBtn.addEventListener('click', () => {
+    const handleReset = () => {
       this.pause();
       this.goToStep(0);
-    });
+    };
+
+    // Bind Simulator controls
+    if (this.playBtnEl) this.playBtnEl.addEventListener('click', handlePlayToggle);
+    if (this.prevBtnEl) this.prevBtnEl.addEventListener('click', handlePrev);
+    if (this.nextBtnEl) this.nextBtnEl.addEventListener('click', handleNext);
+    if (this.resetBtnEl) this.resetBtnEl.addEventListener('click', handleReset);
 
     // Bind Topology controls
     if (this.topoPlayBtnEl) this.topoPlayBtnEl.addEventListener('click', handlePlayToggle);
     if (this.topoPrevBtnEl) this.topoPrevBtnEl.addEventListener('click', handlePrev);
     if (this.topoNextBtnEl) this.topoNextBtnEl.addEventListener('click', handleNext);
+    if (this.topoResetBtnEl) this.topoResetBtnEl.addEventListener('click', handleReset);
+
+    // Bind SVG Canvas Floating Arrow buttons
+    if (this.canvasPrevBtnEl) this.canvasPrevBtnEl.addEventListener('click', handlePrev);
+    if (this.canvasNextBtnEl) this.canvasNextBtnEl.addEventListener('click', handleNext);
 
     // Keyboard Shortcuts: ArrowRight (Next Step), ArrowLeft (Prev Step), Space (Play/Pause)
     window.addEventListener('keydown', (e) => {
@@ -944,6 +988,9 @@ class IncidentEngine {
       } else if (e.key === ' ' && !e.target.closest('button')) {
         e.preventDefault();
         handlePlayToggle();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        handleReset();
       }
     });
 
@@ -964,16 +1011,24 @@ class IncidentEngine {
   play() {
     this.isPlaying = true;
     [this.playBtnEl, this.topoPlayBtnEl].forEach(btn => {
-      if (btn) btn.innerHTML = '<span class="btn-icon">⏸</span><span class="btn-text">Pause Loop</span>';
+      if (btn) btn.innerHTML = '<span class="btn-icon">⏸</span><span class="btn-text">Pause</span>';
     });
+    if (this.topoModePillEl) {
+      this.topoModePillEl.textContent = 'AUTO-LOOP ACTIVE';
+      this.topoModePillEl.classList.add('auto-active');
+    }
     this.scheduleNext();
   }
 
   pause() {
     this.isPlaying = false;
     [this.playBtnEl, this.topoPlayBtnEl].forEach(btn => {
-      if (btn) btn.innerHTML = '<span class="btn-icon">▶</span><span class="btn-text">Auto-Loop</span>';
+      if (btn) btn.innerHTML = '<span class="btn-icon">▶</span><span class="btn-text">Auto-Play</span>';
     });
+    if (this.topoModePillEl) {
+      this.topoModePillEl.textContent = 'MANUAL STEP MODE';
+      this.topoModePillEl.classList.remove('auto-active');
+    }
     clearTimeout(this.timer);
   }
 
@@ -1006,35 +1061,65 @@ class IncidentEngine {
       this.stageBadgeEl.textContent = stage.status.toUpperCase();
     }
 
-    // 2. Update Topology Flow Control Strip
+    // 2. Update Topology Interactive Console
     if (this.topoStepCounterEl) {
       this.topoStepCounterEl.textContent = `STAGE ${stage.step} / ${SIMULATION_STAGES.length}`;
     }
     if (this.topoStepTitleEl) {
       this.topoStepTitleEl.textContent = stage.title;
     }
+    if (this.topoStepDescEl) {
+      this.topoStepDescEl.textContent = stage.description;
+    }
+    if (this.topoStepBadgeEl) {
+      this.topoStepBadgeEl.className = `topo-status-badge ${stage.status}`;
+      let badgeLabel = 'ACTIVE INGEST';
+      if (stage.status === 'anomaly') badgeLabel = 'FAULT DETECTED';
+      else if (stage.status === 'processing') badgeLabel = 'REASONING PIPELINE';
+      else if (stage.status === 'waiting') badgeLabel = 'HUMAN REVIEW REQUIRED';
+      else if (stage.status === 'resolved') badgeLabel = 'SANDBOX PASS / VERIFIED';
+      this.topoStepBadgeEl.textContent = badgeLabel;
+    }
 
-    // 3. Update Stepper Indicators for both control bars
-    [this.timelineStepperEl, this.topoStepperEl].forEach(container => {
-      if (!container) return;
-      const indicators = container.querySelectorAll('.step-indicator');
+    // 3. Update Active Telemetry Flow route text on Canvas Footer
+    if (this.topoFlowTextEl && stage.edge) {
+      const fromNode = ARCHITECTURE_NODES[stage.edge.from];
+      const toNode = ARCHITECTURE_NODES[stage.edge.to];
+      if (fromNode && toNode) {
+        this.topoFlowTextEl.textContent = `${fromNode.name} [${fromNode.monogram}] ──▶ ${toNode.name} [${toNode.monogram}]`;
+      }
+    }
+
+    // 4. Update 10 Scrubber Buttons on Topology Console
+    if (this.topoScrubberEl) {
+      const scrubBtns = this.topoScrubberEl.querySelectorAll('.topo-scrubber-btn');
+      scrubBtns.forEach((btn, idx) => {
+        btn.classList.remove('active', 'completed');
+        if (idx === index) btn.classList.add('active');
+        else if (idx < index) btn.classList.add('completed');
+      });
+    }
+
+    // 5. Update Stepper Indicators on Simulator Timeline
+    if (this.timelineStepperEl) {
+      const indicators = this.timelineStepperEl.querySelectorAll('.step-indicator');
       indicators.forEach((dot, idx) => {
         dot.className = 'step-indicator';
         if (idx === index) dot.classList.add('active');
         else if (idx < index) dot.classList.add('completed');
       });
-    });
+    }
 
-    // 4. Update Topology Graph
+    // 6. Update Architecture Topology Graph (nodes & pulsing edge)
     this.topology.updateStage(stage.activeNodes, stage.edge, stage.status);
 
-    // 5. Update Metrics Canvas
+    // 7. Update Real-Time Metrics Canvas Target
     this.metrics.setTargetMetrics(stage.metrics.p99);
 
-    // 6. Append Telemetry Log
+    // 8. Append Telemetry Log to Terminal Window
     this.appendLog(stage.log.level, stage.log.text);
 
-    // 7. Update Slack Interactive Card
+    // 9. Update Slack Interactive Alert Card
     if (this.slackCardEl && stage.slack) {
       this.slackCardEl.className = `slack-interactive-card ${stage.slack.alertClass}`;
       if (this.slackMessageEl) {
@@ -1042,7 +1127,7 @@ class IncidentEngine {
       }
     }
 
-    // 8. Update GitHub Pull Request Card
+    // 10. Update GitHub Pull Request Card with Diff
     if (this.githubPrCardEl) {
       if (stage.pr && stage.pr.visible) {
         this.githubPrCardEl.style.display = 'block';
@@ -1055,11 +1140,11 @@ class IncidentEngine {
       }
     }
 
-    // 9. Update GPU hardware state
+    // 11. Update GPU hardware state
     const isGpuActive = stage.activeNodes.includes('gem');
     this.updateGpuMeter(isGpuActive);
 
-    // Schedule next step only if in auto-loop mode
+    // Schedule next step ONLY if user explicitly enabled auto-loop mode
     if (this.isPlaying) {
       this.scheduleNext();
     }

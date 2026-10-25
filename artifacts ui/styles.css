@@ -1088,62 +1088,207 @@ section {
 .legend-dot.waiting { background: var(--color-amber); box-shadow: 0 0 6px var(--color-amber); }
 .legend-dot.fault { background: var(--color-crimson); box-shadow: 0 0 6px var(--color-crimson); }
 
-/* Interactive Topology Flow Control Strip */
-.topology-control-strip {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  background: #090E1A;
+/* ==========================================================================
+   TOPOLOGY INTERACTIVE CONSOLE & CANVAS CONTROLLER
+   ========================================================================== */
+
+.topology-control-panel {
+  background: linear-gradient(180deg, #0D1424 0%, #070B14 100%);
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-lg);
-  padding: 10px 18px;
+  padding: 16px 20px;
   margin-bottom: var(--space-4);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
 }
 
-.topo-stage-meta {
+.topo-console-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-6);
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.topo-meta-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.topo-badge-row {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  min-width: 280px;
+  gap: 8px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
 }
 
-.topo-step-pill {
+.topo-stage-pill {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  padding: 3px 10px;
+  background: rgba(255, 92, 53, 0.15);
+  border: 1px solid rgba(255, 92, 53, 0.45);
+  color: var(--color-brand-primary);
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.topo-status-badge {
   font-family: var(--font-mono);
   font-size: 0.6875rem;
   font-weight: 700;
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  transition: all var(--duration-fast) ease;
+}
+
+.topo-status-badge.anomaly {
+  background: rgba(255, 59, 92, 0.18);
+  color: var(--color-crimson);
+  border: 1px solid rgba(255, 59, 92, 0.4);
+}
+
+.topo-status-badge.processing {
+  background: rgba(0, 212, 255, 0.18);
+  color: var(--color-cyan);
+  border: 1px solid rgba(0, 212, 255, 0.4);
+}
+
+.topo-status-badge.waiting {
+  background: rgba(251, 191, 36, 0.18);
+  color: var(--color-amber);
+  border: 1px solid rgba(251, 191, 36, 0.4);
+}
+
+.topo-status-badge.resolved {
+  background: rgba(0, 240, 144, 0.18);
+  color: var(--color-emerald);
+  border: 1px solid rgba(0, 240, 144, 0.4);
+}
+
+.topo-mode-pill {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
   padding: 3px 8px;
-  background: rgba(255, 92, 53, 0.15);
-  border: 1px solid rgba(255, 92, 53, 0.35);
-  color: var(--color-brand-primary);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--color-text-tertiary);
   border-radius: var(--radius-sm);
   white-space: nowrap;
 }
 
-.topo-step-name {
+.topo-mode-pill.auto-active {
+  background: rgba(0, 212, 255, 0.15);
+  border-color: rgba(0, 212, 255, 0.4);
+  color: var(--color-cyan);
+}
+
+.topo-stage-title {
   font-family: var(--font-display);
+  font-size: 1.125rem;
   font-weight: 700;
-  font-size: 0.875rem;
   color: var(--color-text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 380px;
+  margin-bottom: 4px;
+  line-height: 1.3;
 }
 
-.topo-actions-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.topo-stepper-dots {
-  max-width: 220px;
+.topo-stage-desc {
+  font-size: 0.84375rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  max-width: 740px;
   margin: 0;
 }
 
-/* SVG Architectural Canvas */
+.topo-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.sim-btn.icon-reset-btn {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  font-size: 1.125rem;
+}
+
+/* 10-Stage Scrubber Row */
+.topo-scrubber-row {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 6px;
+  width: 100%;
+}
+
+.topo-scrubber-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 6px 8px;
+  background: rgba(14, 21, 35, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-spring);
+  text-align: left;
+  color: var(--color-text-tertiary);
+  min-width: 0;
+}
+
+.topo-scrubber-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: var(--color-text-primary);
+  transform: translateY(-1px);
+}
+
+.topo-scrubber-btn.active {
+  background: linear-gradient(135deg, rgba(255, 92, 53, 0.22) 0%, rgba(124, 92, 252, 0.22) 100%);
+  border-color: var(--color-brand-primary);
+  color: #FFFFFF;
+  box-shadow: 0 0 12px rgba(255, 92, 53, 0.4);
+}
+
+.topo-scrubber-btn.completed {
+  border-color: rgba(0, 240, 144, 0.35);
+  color: var(--color-text-secondary);
+}
+
+.scrubber-num {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+  opacity: 0.8;
+}
+
+.topo-scrubber-btn.active .scrubber-num {
+  color: var(--color-brand-primary);
+  opacity: 1;
+}
+
+.scrubber-label {
+  font-family: var(--font-display);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+/* SVG Architectural Canvas with Floating Controls */
 .topology-svg-wrapper {
   width: 100%;
   background: radial-gradient(circle at 50% 30%, #0F172A 0%, #080C16 100%);
@@ -1151,6 +1296,116 @@ section {
   border-radius: var(--radius-lg);
   overflow: hidden;
   position: relative;
+}
+
+.topo-canvas-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(10, 15, 26, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--color-text-primary);
+  font-size: 1.5rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.65);
+  transition: all var(--duration-fast) var(--ease-spring);
+}
+
+.topo-canvas-arrow.prev {
+  left: 14px;
+}
+
+.topo-canvas-arrow.next {
+  right: 14px;
+}
+
+.topo-canvas-arrow:hover {
+  background: var(--color-brand-primary);
+  border-color: var(--color-brand-primary);
+  color: #FFFFFF;
+  transform: translateY(-50%) scale(1.12);
+  box-shadow: 0 0 20px rgba(255, 92, 53, 0.6);
+}
+
+.topo-canvas-footer {
+  position: absolute;
+  bottom: 12px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(9, 14, 25, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  padding: 8px 16px;
+  backdrop-filter: blur(12px);
+  z-index: 5;
+}
+
+.topo-flow-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.pulse-beacon {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-cyan);
+  box-shadow: 0 0 8px var(--color-cyan);
+  animation: beaconPulse 1.8s infinite;
+}
+
+.flow-label {
+  color: var(--color-text-tertiary);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.flow-text {
+  color: var(--color-cyan);
+  font-weight: 600;
+}
+
+.topo-nav-hint {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--color-text-tertiary);
+}
+
+.topo-nav-hint kbd {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 3px;
+  padding: 1px 5px;
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+}
+
+@media (max-width: 900px) {
+  .topo-console-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .topo-controls-right {
+    justify-content: flex-start;
+  }
+  .topo-scrubber-row {
+    grid-template-columns: repeat(5, 1fr);
+  }
 }
 
 #topology-svg {

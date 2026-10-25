@@ -361,39 +361,72 @@
             </div>
           </div>
 
-          <!-- Interactive Topology Flow Control Strip -->
-          <div class="topology-control-strip">
-            <div class="topo-stage-meta">
-              <span class="topo-step-pill" id="topo-step-counter">STAGE 1 / 10</span>
-              <span class="topo-step-name" id="topo-step-title">Synthetic Fault Injected in Production Service</span>
+          <!-- Comprehensive Topology Interactive Console -->
+          <div class="topology-control-panel">
+            <div class="topo-console-header">
+              <div class="topo-meta-left">
+                <div class="topo-badge-row">
+                  <span class="topo-stage-pill" id="topo-step-counter">STAGE 1 / 10</span>
+                  <span class="topo-status-badge anomaly" id="topo-step-badge">FAULT DETECTED</span>
+                  <span class="topo-mode-pill" id="topo-mode-pill">MANUAL STEP MODE</span>
+                </div>
+                <h3 class="topo-stage-title" id="topo-step-title">Synthetic Fault Injected in Production Service</h3>
+                <p class="topo-stage-desc" id="topo-step-desc">
+                  Chaos Lab initiates a controlled memory leak and N+1 query loop on checkout-service (commit a1f3). Heap RSS climbs rapidly.
+                </p>
+              </div>
+
+              <div class="topo-controls-right">
+                <button class="sim-btn step-nav-btn" id="topo-prev-btn" title="Previous Stage [Left Arrow Key]" aria-label="Previous Stage">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M15 18l-6-6 6-6" />
+                  </svg>
+                  <span>Prev</span>
+                </button>
+
+                <button class="sim-btn play-btn" id="topo-play-btn" title="Toggle Auto-Play [Spacebar]" aria-label="Toggle Auto-Play">
+                  <span class="btn-icon">▶</span>
+                  <span class="btn-text">Auto-Play</span>
+                </button>
+
+                <button class="sim-btn step-nav-btn primary-nav" id="topo-next-btn" title="Next Stage [Right Arrow Key]" aria-label="Next Stage">
+                  <span>Next Step</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </button>
+
+                <button class="sim-btn icon-reset-btn" id="topo-reset-btn" title="Reset Simulation to Stage 1" aria-label="Reset Simulation">
+                  ↺
+                </button>
+              </div>
             </div>
 
-            <div class="topo-actions-group">
-              <button class="sim-btn step-nav-btn" id="topo-prev-btn" title="Previous Stage (Left Arrow)" aria-label="Previous Stage">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <path d="M15 18l-6-6 6-6" />
-                </svg>
-                <span>Prev</span>
-              </button>
-
-              <button class="sim-btn play-btn" id="topo-play-btn" title="Toggle Auto-Play (Spacebar)">
-                <span class="btn-icon">▶</span>
-                <span class="btn-text">Auto-Loop</span>
-              </button>
-
-              <button class="sim-btn step-nav-btn primary-nav" id="topo-next-btn" title="Next Stage (Right Arrow)" aria-label="Next Stage">
-                <span>Next Step</span>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <path d="M9 18l6-6-6-6" />
-                </svg>
-              </button>
-            </div>
-
-            <div class="stepper-timeline topo-stepper-dots" id="topo-stepper-timeline"></div>
+            <!-- 10 Interactive Numbered Scrubber Stage Pills -->
+            <div class="topo-scrubber-row" id="topo-scrubber-pills" role="tablist" aria-label="Simulation Stage Scrubber"></div>
           </div>
 
+          <!-- SVG Architectural Visualizer Canvas with Floating Canvas Quick Controls -->
           <div class="topology-svg-wrapper">
+            <button class="topo-canvas-arrow prev" id="canvas-prev-btn" title="Previous Stage [Left Arrow Key]" aria-label="Previous Stage">
+              ‹
+            </button>
+            <button class="topo-canvas-arrow next" id="canvas-next-btn" title="Next Stage [Right Arrow Key]" aria-label="Next Stage">
+              ›
+            </button>
+
             <svg id="topology-svg" viewBox="0 0 1230 460" role="img" aria-label="Firebreak System Architecture Topology"></svg>
+
+            <div class="topo-canvas-footer">
+              <div class="topo-flow-info" id="topo-flow-info">
+                <span class="pulse-beacon"></span>
+                <span class="flow-label">ACTIVE TELEMETRY FLOW:</span>
+                <span class="flow-text" id="topo-flow-text">Chaos Lab [CL] ──▶ Prometheus [Pm]</span>
+              </div>
+              <div class="topo-nav-hint">
+                <kbd>←</kbd> <kbd>→</kbd> Step Stages · <kbd>Space</kbd> Auto-Play · Click nodes for schemas
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -423,7 +456,7 @@
               </button>
               <button class="sim-btn play-btn" id="play-btn">
                 <span class="btn-icon">▶</span>
-                <span class="btn-text">Auto-Loop</span>
+                <span class="btn-text">Auto-Play</span>
               </button>
               <button class="sim-btn step-nav-btn primary-nav" id="next-btn" title="Next Stage (Right Arrow)" aria-label="Next Stage">
                 Next Step ›
