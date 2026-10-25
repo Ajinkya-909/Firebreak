@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Firebreak — Enterprise AI Incident Remediation and Ephemeral Patch Verification platform built on Temporal, Google ADK, Docker, and Prometheus.">
+  <title>Firebreak — Autonomous Incident Remediation & Ephemeral Patch Verification</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  
+  <!-- Premium Typography: Plus Jakarta Sans, Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Design System & Component Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ==========================================================================
+       SITE NAVIGATION & REAL-TIME SYSTEM HUD
+       ========================================================================== -->
+  <header class="site-nav" role="banner">
+    <div class="container nav-wrapper">
+      <a href="#hero" class="brand-lockup" aria-label="Firebreak Platform Home">
+        <div class="brand-icon">
+          <svg width="18" height="18" viewBox="0 0 64 64" fill="none">
+            <path d="M32 10 L48 18 V34 C48 44 41 51 32 54 C23 51 16 44 16 34 V18 Z" fill="#0E1626" stroke="#FF5C35" stroke-width="3" />
+            <path d="M32 18 C35 23 41 27 41 35 C41 40 37 45 32 45 C27 45 23 40 23 35 C23 30 27 27 29 24 C29 27 30 29 32 29 C30 25 31 21 32 18 Z" fill="#FF5C35" />
+          </svg>
+        </div>
+        <span class="brand-name">Firebreak</span>
+        <span class="brand-badge">v2.4</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Main Navigation">
+        <a href="#problem" class="nav-link">Problem</a>
+        <a href="#topology" class="nav-link">Topology</a>
+        <a href="#simulator" class="nav-link">Simulator</a>
+        <a href="#agents" class="nav-link">ADK Agents</a>
+        <a href="#temporal" class="nav-link">Durability</a>
+        <a href="#stack" class="nav-link">Tech Stack</a>
+        <a href="#roadmap" class="nav-link">Roadmap</a>
+      </nav>
+
+      <div class="nav-actions">
+        <div class="status-pill" title="Temporal Engine & Telemetry Pipeline Online">
+          <span class="status-beacon"></span>
+          <span>ENGINE ACTIVE</span>
+        </div>
+        <a href="#simulator" class="btn-primary btn-sm" id="nav-run-sim-btn">
+          <span>Run Sim</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main role="main">
+    <!-- ==========================================================================
+         HERO SECTION: EXECUTIVE COMMAND CENTER & METRIC STRIP
+         ========================================================================== -->
+    <section class="hero-section" id="hero">
+      <div class="container">
+        <div class="hero-grid">
+          <!-- Left Hero Column: Value Proposition & Ecosystem -->
+          <div class="hero-left">
+            <div class="section-eyebrow">
+              <span class="status-beacon"></span>
+              <span>AUTONOMOUS REMEDIATION & GOVERNANCE</span>
+            </div>
+            
+            <h1>
+              Detects the Incident.<br>
+              Writes the Patch.<br>
+              <span class="text-gradient-brand">Proves It in Docker.</span>
+            </h1>
+            
+            <p class="hero-tagline">
+              Firebreak operates as an autonomous on-call systems engineer. Powered by Temporal durable workflows, Google ADK multi-agent reasoning, and sandboxed Docker container verification, it triages anomalies in under 2 minutes, generates provable fixes against replayed traffic, and enforces strict human-in-the-loop review.
+            </p>
+
+            <div class="hero-cta-group">
+              <a href="#simulator" class="btn-primary">
+                <span>Watch Live Incident Unfold</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </a>
+              <a href="#topology" class="btn-secondary">
+                <span>Explore Topology Specs</span>
+              </a>
+            </div>
+
+            <!-- Ecosystem Monograms Bar -->
+            <div class="hero-ecosystem-bar">
+              <span class="ecosystem-label">CORE ECOSYSTEM:</span>
+              <div class="ecosystem-badges">
+                <span class="eco-pill"><strong style="color: #7C5CFC;">Tp</strong> Temporal</span>
+                <span class="eco-pill"><strong style="color: #4285F4;">AD</strong> Google ADK</span>
+                <span class="eco-pill"><strong style="color: #2496ED;">Dk</strong> Docker</span>
+                <span class="eco-pill"><strong style="color: #14B8A6;">Sm</strong> Supermemory</span>
+                <span class="eco-pill"><strong style="color: #E6522C;">Pm</strong> Prometheus</span>
+                <span class="eco-pill"><strong style="color: #76B900;">JL</strong> H100 GPU</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Hero Column: Interactive Command Radar Card -->
+          <div class="hero-right">
+            <div class="hero-radar-card">
+              <div class="radar-card-header">
+                <div class="radar-live-badge">
+                  <span class="radar-pulse"></span>
+                  <span>LIVE INCIDENT RADAR</span>
+                </div>
+                <span class="radar-service-tag">checkout-service:v1.14</span>
+              </div>
+
+              <div class="radar-stat-strip">
+                <div class="radar-stat-box">
+                  <div class="radar-stat-label">INCIDENT STATUS</div>
+                  <div class="radar-stat-val anomaly">SEV2 ANOMALY</div>
+                </div>
+                <div class="radar-stat-box">
+                  <div class="radar-stat-label">MTTD CLOCK</div>
+                  <div class="radar-stat-val">01:42</div>
+                </div>
+                <div class="radar-stat-box">
+                  <div class="radar-stat-label">WORKFLOW ID</div>
+                  <div class="radar-stat-val mono">inc-9f2a</div>
+                </div>
+              </div>
+
+              <!-- Mini Sparkline Graph -->
+              <div class="radar-graph-box">
+                <div class="radar-graph-meta">
+                  <span>p99 Latency Spike & Recovery</span>
+                  <span class="mono" style="color: var(--color-crimson);">2.38s → 0.32s</span>
+                </div>
+                <svg class="radar-svg" viewBox="0 0 340 70" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="spikeGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="rgba(255, 59, 92, 0.4)" />
+                      <stop offset="60%" stop-color="rgba(0, 240, 144, 0.2)" />
+                      <stop offset="100%" stop-color="rgba(0, 0, 0, 0)" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M0,52 Q40,50 70,52 T120,48 Q140,45 150,12 Q165,10 180,22 T210,18 Q230,16 250,50 T340,54 L340,70 L0,70 Z" fill="url(#spikeGrad)" />
+                  <path d="M0,52 Q40,50 70,52 T120,48 Q140,45 150,12 Q165,10 180,22 T210,18 Q230,16 250,50 T340,54" fill="none" stroke="#00D4FF" stroke-width="2.5" />
+                  <circle cx="150" cy="12" r="4.5" fill="#FF3B5C" />
+                  <circle cx="270" cy="52" r="4.5" fill="#00F090" />
+                </svg>
+              </div>
+
+              <!-- Live Findings & Proofs -->
+              <div class="radar-findings-list">
+                <div class="radar-finding-item">
+                  <span class="finding-icon" style="color: var(--color-crimson);">●</span>
+                  <span><strong>Root Cause:</strong> Unbounded Map cache in <code>orders.ts</code> (commit a1f3)</span>
+                </div>
+                <div class="radar-finding-item">
+                  <span class="finding-icon" style="color: var(--color-emerald);">✓</span>
+                  <span><strong>Docker Sandbox:</strong> 42/42 Tests PASS · p99 reduced 86%</span>
+                </div>
+              </div>
+
+              <!-- Interactive Action Gateway -->
+              <div class="radar-action-box">
+                <div class="radar-pr-badge">
+                  <span>Draft PR #214</span>
+                  <span class="tag-verified">VERIFIED PROOF</span>
+                </div>
+                <button class="hero-approve-btn" id="hero-interactive-approve-btn" onclick="this.innerHTML='✓ APPROVED · SIGNAL SENT'; this.style.background='var(--color-emerald)'; this.style.color='#070A11';">
+                  Approve Fix & Signal
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Executive Key Performance Indicator Strip -->
+        <div class="metric-strip">
+          <div class="metric-cell">
+            <div class="metric-number highlight-emerald">&lt; 120s</div>
+            <div class="metric-label">Mean Time to Detect (MTTD)</div>
+            <div class="metric-note">Down from 20+ min manual triage</div>
+          </div>
+          <div class="metric-cell">
+            <div class="metric-number highlight-brand">-73%</div>
+            <div class="metric-label">Mean Time to Resolve (MTTR)</div>
+            <div class="metric-note">Empirically validated on Chaos Lab</div>
+          </div>
+          <div class="metric-cell">
+            <div class="metric-number highlight-cyan">100%</div>
+            <div class="metric-label">Sandboxed Fix Verification</div>
+            <div class="metric-note">Zero unverified code recommendations</div>
+          </div>
+          <div class="metric-cell">
+            <div class="metric-number highlight-temporal">0</div>
+            <div class="metric-label">Autonomous Auto-Merges</div>
+            <div class="metric-note">Human SRE retains complete veto</div>
+          </div>
+        </div>
+
+        <!-- Live Streaming Ticker Preview -->
+        <div class="terminal-ticker">
+          <div class="ticker-bar">
+            <div class="ticker-dots">
+              <span class="ticker-dot"></span>
+              <span class="ticker-dot"></span>
+              <span class="ticker-dot"></span>
+            </div>
+            <span class="ticker-title">checkout-service-production · Telemetry Scraper</span>
+            <span class="mono">us-east-1a</span>
+          </div>
+          <div class="ticker-body">
+            <span class="ticker-pill">LIVE PROBE</span>
+            <span id="ticker-log-preview">Prometheus scrapers running: checkout-node healthy (p99: 0.28s)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         SECTION 1: COMPARATIVE ARCHITECTURE ANALYSIS
+         ========================================================================== -->
+    <section id="problem">
+      <div class="container">
+        <div class="section-header center">
+          <div class="section-eyebrow">
+            <span>The Operational Problem</span>
+          </div>
+          <h2>Engineers Lose the First 20 Minutes Gathering Dispersed Context</h2>
+          <p class="section-subtitle">
+            Modern incident response is crippled by cognitive fragmentation. Logs, metrics, git histories, and historical post-mortems live in isolated silos, while SREs spend critical minutes assembling clues by hand.
+          </p>
+        </div>
+
+        <div class="comparison-grid">
+          <!-- Traditional Incident Response -->
+          <article class="comparison-card legacy">
+            <div class="card-header-group">
+              <div>
+                <div class="card-category">Traditional On-Call Workflow</div>
+                <h3>Fragmented Manual Triage</h3>
+              </div>
+              <div class="card-timer-stat">
+                <div class="timer-digits">20:00+</div>
+                <div class="timer-caption">Time to First Context</div>
+              </div>
+            </div>
+
+            <div class="track-wrapper">
+              <div class="track-label">
+                <span>Investigative Latency</span>
+                <span class="mono">20 to 45 minutes</span>
+              </div>
+              <div class="track-bar">
+                <div class="track-progress legacy-bar"></div>
+              </div>
+            </div>
+
+            <ul class="comparison-points">
+              <li class="comparison-point">
+                <span class="point-icon">✕</span>
+                <span>Context fragmentation: SREs manually correlate Grafana dashboards, Loki streams, Slack threads, and Git commits.</span>
+              </li>
+              <li class="comparison-point">
+                <span class="point-icon">✕</span>
+                <span>No institutional memory: Recurring incidents are diagnosed from scratch without historical resolution recall.</span>
+              </li>
+              <li class="comparison-point">
+                <span class="point-icon">✕</span>
+                <span>Unverified hotfixes: Emergency code diffs are pushed directly under pressure without replaying failing traffic in isolated sandboxes.</span>
+              </li>
+              <li class="comparison-point">
+                <span class="point-icon">✕</span>
+                <span>Exhaustive alert fatigue: Static thresholds flood on-call channels with harmless false positives.</span>
+              </li>
+            </ul>
+          </article>
+
+          <!-- Firebreak Autonomous Pipeline -->
+          <article class="comparison-card firebreak">
+            <div class="card-header-group">
+              <div>
+                <div class="card-category">Firebreak Autonomous Architecture</div>
+                <h3>Deterministic, Verified Pipeline</h3>
+              </div>
+              <div class="card-timer-stat">
+                <div class="timer-digits">01:45</div>
+                <div class="timer-caption">Time to Initial Report</div>
+              </div>
+            </div>
+
+            <div class="track-wrapper">
+              <div class="track-label">
+                <span>Autonomous Latency</span>
+                <span class="mono">&lt; 2 minutes</span>
+              </div>
+              <div class="track-bar">
+                <div class="track-progress firebreak-bar"></div>
+              </div>
+            </div>
+
+            <ul class="comparison-points">
+              <li class="comparison-point">
+                <span class="point-icon">✓</span>
+                <span>Zero-LLM Statistical Gating: EWMA and Z-Score math evaluate metric anomalies before invoking LLMs, keeping costs and noise near zero.</span>
+              </li>
+              <li class="comparison-point">
+                <span class="point-icon">✓</span>
+                <span>Supermemory Institutional Recall: Historical incident resolutions, rejected diffs, and noise signatures are recalled before triage begins.</span>
+              </li>
+              <li class="comparison-point">
+                <span class="point-icon">✓</span>
+                <span>Empirical Docker Sandboxing: Every proposed code patch is verified in an isolated container against replayed load traffic before human review.</span>
+              </li>
+              <li class="comparison-point">
+                <span class="point-icon">✓</span>
+                <span>Temporal Durable Orchestration: Crash-resilient workflows guarantee zero lost state, durable signal gates, and audited post-mortems.</span>
+              </li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         SECTION 2: ARCHITECTURE TOPOLOGY VISUALIZER
+         ========================================================================== -->
+    <section id="topology">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-eyebrow">
+            <span>System Architecture Topology</span>
+          </div>
+          <h2>Durable Orchestration Across Twelve Integrated Subsystems</h2>
+          <p class="section-subtitle">
+            Click any component node in the topology below to inspect its formal enterprise specification, input/output schemas, failure modes, and architectural advantages.
+          </p>
+        </div>
+
+        <div class="topology-container">
+          <div class="topology-hud">
+            <div class="hud-left">
+              <span class="hud-pill">Target: <strong>checkout-service:v1.14</strong></span>
+              <span class="hud-pill">Runtime: <strong>Temporal Python SDK & Google ADK</strong></span>
+            </div>
+            <div class="hud-legend">
+              <div class="legend-item"><span class="legend-dot idle"></span><span>Idle</span></div>
+              <div class="legend-item"><span class="legend-dot running"></span><span>Active Ingest</span></div>
+              <div class="legend-item"><span class="legend-dot fault"></span><span>Fault Detected</span></div>
+              <div class="legend-item"><span class="legend-dot waiting"></span><span>Human Review</span></div>
+              <div class="legend-item"><span class="legend-dot verified"></span><span>Verified / Passing</span></div>
+            </div>
+          </div>
+
+          <!-- Interactive Topology Flow Control Strip -->
+          <div class="topology-control-strip">
+            <div class="topo-stage-meta">
+              <span class="topo-step-pill" id="topo-step-counter">STAGE 1 / 10</span>
+              <span class="topo-step-name" id="topo-step-title">Synthetic Fault Injected in Production Service</span>
+            </div>
+
+            <div class="topo-actions-group">
+              <button class="sim-btn step-nav-btn" id="topo-prev-btn" title="Previous Stage (Left Arrow)" aria-label="Previous Stage">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+                <span>Prev</span>
+              </button>
+
+              <button class="sim-btn play-btn" id="topo-play-btn" title="Toggle Auto-Play (Spacebar)">
+                <span class="btn-icon">▶</span>
+                <span class="btn-text">Auto-Loop</span>
+              </button>
+
+              <button class="sim-btn step-nav-btn primary-nav" id="topo-next-btn" title="Next Stage (Right Arrow)" aria-label="Next Stage">
+                <span>Next Step</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+            </div>
+
+            <div class="stepper-timeline topo-stepper-dots" id="topo-stepper-timeline"></div>
+          </div>
+
+          <div class="topology-svg-wrapper">
+            <svg id="topology-svg" viewBox="0 0 1230 460" role="img" aria-label="Firebreak System Architecture Topology"></svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         SECTION 3: INTERACTIVE INCIDENT LIFECYCLE SIMULATOR
+         ========================================================================== -->
+    <section id="simulator">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-eyebrow">
+            <span>Interactive Incident Simulation</span>
+          </div>
+          <h2>Trace an End-to-End Remediation Cycle in Real Time</h2>
+          <p class="section-subtitle">
+            Follow the 10-stage lifecycle as Firebreak detects an N+1 memory degradation, dispatches multi-agent reasoning, verifies an LRU cache patch in a Docker sandbox, and requests human approval via Slack and GitHub.
+          </p>
+        </div>
+
+        <div class="simulator-container">
+          <!-- Control Toolbar -->
+          <div class="sim-controls-panel">
+            <div class="sim-btn-group">
+              <button class="sim-btn step-nav-btn" id="prev-btn" title="Previous Stage (Left Arrow)" aria-label="Previous Stage">
+                ‹ Prev
+              </button>
+              <button class="sim-btn play-btn" id="play-btn">
+                <span class="btn-icon">▶</span>
+                <span class="btn-text">Auto-Loop</span>
+              </button>
+              <button class="sim-btn step-nav-btn primary-nav" id="next-btn" title="Next Stage (Right Arrow)" aria-label="Next Stage">
+                Next Step ›
+              </button>
+              <button class="sim-btn" id="reset-btn" title="Reset Simulation to Stage 1" aria-label="Reset Simulation">↺</button>
+            </div>
+
+            <!-- Stepper Indicators -->
+            <div class="stepper-timeline" id="stepper-timeline"></div>
+
+            <!-- Playback Speed Control -->
+            <div class="sim-speed-selector">
+              <button class="speed-option active" id="speed-1x">1x</button>
+              <button class="speed-option" id="speed-2x">2x</button>
+            </div>
+          </div>
+
+          <!-- Active Stage Headline Banner -->
+          <div class="sim-stage-banner">
+            <div class="stage-info-group">
+              <div class="stage-counter" id="stage-counter">Stage 1 of 10</div>
+              <h3 class="stage-headline" id="stage-title">Synthetic Fault Injected in Production Service</h3>
+              <p class="stage-description" id="stage-desc">
+                Chaos Lab initiates a controlled memory leak and N+1 query loop on checkout-service (commit a1f3). Heap RSS climbs rapidly.
+              </p>
+            </div>
+            <div class="stage-badge-status anomaly" id="stage-badge">ANOMALY</div>
+          </div>
+
+          <!-- Synchronized Telemetry & Terminal Panels -->
+          <div class="sim-grid-viewport">
+            <!-- Left: Prometheus Timeseries Canvas Chart -->
+            <div class="chart-panel">
+              <div class="panel-header">
+                <span class="panel-title">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 3v18h18M18 9l-5 5-4-4-6 6" />
+                  </svg>
+                  Prometheus Telemetry · checkout-service p99 Latency (seconds)
+                </span>
+                <div class="chart-legend">
+                  <div class="chart-legend-item">
+                    <span class="chart-legend-color" style="background: #00D4FF;"></span>
+                    <span>Live Scrapes</span>
+                  </div>
+                  <div class="chart-legend-item">
+                    <span class="chart-legend-color" style="background: rgba(255, 255, 255, 0.4);"></span>
+                    <span>Baseline (0.3s)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="canvas-wrapper">
+                <canvas id="metrics-canvas"></canvas>
+              </div>
+            </div>
+
+            <!-- Right: Streaming Terminal & Log Observer -->
+            <div class="terminal-panel">
+              <div class="terminal-header">
+                <span>STDOUT & TELEMETRY STREAM</span>
+                <span class="mono">temporal-worker-1 · Alloy Pipeline</span>
+              </div>
+              <div class="terminal-logs-body" id="terminal-logs"></div>
+            </div>
+          </div>
+
+          <!-- SRE Integration Action Cards (Slack & GitHub Draft PR) -->
+          <div class="sre-cards-row">
+            <!-- Simulated Slack Notification Card -->
+            <div class="slack-interactive-card" id="slack-card">
+              <div class="slack-header">
+                <div class="slack-avatar">FB</div>
+                <div>
+                  <div class="slack-meta">Firebreak Bot · Incident Notification</div>
+                  <div class="slack-channel">#oncall-checkout-service</div>
+                </div>
+              </div>
+              <div class="slack-message-box" id="slack-message">
+                🚨 <b>INCIDENT DETECTED</b> — checkout-service latency p99 > 2.1s (normal 0.3s). Z-Score 4.8σ.
+              </div>
+              <div class="slack-buttons">
+                <button class="slack-btn approve" id="slack-approve-btn">Approve Fix</button>
+                <button class="slack-btn reject" id="slack-reject-btn">Reject</button>
+                <button class="slack-btn inspect" id="slack-inspect-btn">Inspect Sandbox Logs</button>
+              </div>
+            </div>
+
+            <!-- Simulated GitHub Pull Request Card -->
+            <div class="github-pr-card" id="github-pr-card">
+              <div class="pr-header">
+                <div class="pr-tag-group">
+                  <span class="pr-badge">Draft PR #214</span>
+                  <span class="pr-badge verified">Sandbox PASS</span>
+                </div>
+                <span class="mono" style="font-size: 0.6875rem; color: var(--color-text-tertiary);">firebreak/fix-checkout-cache</span>
+              </div>
+              <h4 class="pr-title">Bound Order Cache with LRU Eviction & Max Bounds</h4>
+              <div class="diff-preview-box">
+                <pre id="pr-diff-content">- private cache = new Map&lt;string, Order&gt;();
++ private cache = new QuickLRU&lt;string, Order&gt;({ maxSize: 10000 });</pre>
+              </div>
+              <div class="pr-footer-stats">
+                <span>Verified in Docker Sandbox (42/42 tests pass)</span>
+                <span style="color: var(--color-emerald);">+1 -1 lines</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- JarvisLabs GPU Inference Hardware Status -->
+          <div class="gpu-status-strip">
+            <div class="gpu-label-group">
+              <span class="mono" style="color: #76FF03; font-weight: 700;">JarvisLabs Cloud GPU</span>
+              <span style="color: var(--color-text-secondary);">NVIDIA H100 80GB · 142 tokens/sec</span>
+              <span class="mono" style="color: var(--color-text-tertiary);">vRAM: 28.4 / 80 GB</span>
+            </div>
+            <div class="gpu-activity-meter" id="gpu-activity-meter"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         SECTION 4: GOOGLE ADK MULTI-AGENT CLUSTER
+         ========================================================================== -->
+    <section id="agents">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-eyebrow">
+            <span>Reasoning Layer</span>
+          </div>
+          <h2>Six Specialized Google ADK Agents Reasoning in Parallel</h2>
+          <p class="section-subtitle">
+            Rather than relying on an unbounded monolithic LLM prompt, Firebreak partitions investigation across six read-only, schema-constrained agents using typed Pydantic v2 data models.
+          </p>
+        </div>
+
+        <div class="agents-grid" id="adk-agents-grid"></div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         SECTION 5: TEMPORAL DURABLE EXECUTION SECTION
+         ========================================================================== -->
+    <section id="temporal">
+      <div class="container">
+        <div class="section-header center">
+          <div class="section-eyebrow">
+            <span>Durable Orchestration</span>
+          </div>
+          <h2>Why Temporal Guarantees Zero State Loss</h2>
+          <p class="section-subtitle">
+            Incident remediation cannot run on ephemeral scripts or fragile cron jobs. Temporal persists every state transition, handles long-running human approval gates, and guarantees deterministic recovery.
+          </p>
+        </div>
+
+        <div class="temporal-showcase-grid">
+          <div class="temporal-card">
+            <h3>Crash Resiliency & Replay</h3>
+            <p>
+              If a worker process restarts mid-investigation, Temporal rehydrates the exact workflow state from the durable event history. Investigations never restart from scratch or lose progress.
+            </p>
+          </div>
+          <div class="temporal-card">
+            <h3>Durable Human Approval Signals</h3>
+            <p>
+              Workflows pause at human review gates for hours or days without consuming server CPU or memory. Signals like <code>approve_fix</code> or <code>reject_fix</code> wake the execution deterministically.
+            </p>
+          </div>
+          <div class="temporal-card">
+            <h3>Idempotent Activity Retries</h3>
+            <p>
+              Slack alerts, GitHub PR creations, and Docker sandbox builds are encapsulated inside idempotent Temporal Activities with exponential backoff and timeout fences.
+            </p>
+          </div>
+        </div>
+
+        <!-- Interactive Signals Bar -->
+        <div class="signals-bar">
+          <div class="signal-pill">
+            <strong>Monitor Schedule</strong>
+            <span>Runs every 30-60s (Zero-LLM)</span>
+          </div>
+          <div class="signal-pill">
+            <strong>IncidentWorkflow</strong>
+            <span>Deduplicated by fingerprint</span>
+          </div>
+          <div class="signal-pill">
+            <strong>Signal: approve_fix</strong>
+            <span>Human SRE governance gate</span>
+          </div>
+          <div class="signal-pill">
+            <strong>Verification Activity</strong>
+            <span>Docker sandbox timeout fence</span>
+          </div>
+          <div class="signal-pill">
+            <strong>ContinueAsNew</strong>
+            <span>History rollups for long monitoring</span>
+          </div>
+          <div class="signal-pill">
+            <strong>Recovery Verification</strong>
+            <span>10-min post-patch stability timer</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         SECTION 6: ENTERPRISE TECHNOLOGY STACK DIRECTORY
+         ========================================================================== -->
+    <section id="stack">
+      <div class="container">
+        <div class="section-header center">
+          <div class="section-eyebrow">
+            <span>Technology Ecosystem</span>
+          </div>
+          <h2>Built on Twelve Industry-Standard Production Tools</h2>
+          <p class="section-subtitle">
+            Each subsystem is chosen for operational reliability, open standards, and zero vendor lock-in. Hover any card to illuminate its role in the architecture topology.
+          </p>
+        </div>
+
+        <!-- Category Filter Tabs -->
+        <div class="tech-filter-tabs" id="tech-filter-tabs">
+          <button class="filter-tab active" data-filter="all">All Subsystems</button>
+          <button class="filter-tab" data-filter="orchestration">Workflow & Persistence</button>
+          <button class="filter-tab" data-filter="intelligence">AI & Intelligence</button>
+          <button class="filter-tab" data-filter="observability">Observability & eBPF</button>
+          <button class="filter-tab" data-filter="runtime">Runtime & Sandbox</button>
+          <button class="filter-tab" data-filter="delivery">Alerting & Delivery</button>
+        </div>
+
+        <!-- Dynamic Tech Grid -->
+        <div class="tech-stack-grid" id="tech-stack-grid"></div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         SECTION 7: ROADMAP & CHAOS LAB BENCHMARK SCORECARD
+         ========================================================================== -->
+    <section id="roadmap">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-eyebrow">
+            <span>Evaluation & Roadmap</span>
+          </div>
+          <h2>Four Structured Implementation Phases & Empirical Ground Truth</h2>
+          <p class="section-subtitle">
+            Every phase of Firebreak terminates in an automated, reproducible demo scored against ground truth in our dedicated Chaos Engineering testbed.
+          </p>
+        </div>
+
+        <!-- Roadmap Grid -->
+        <div class="roadmap-grid">
+          <div class="roadmap-phase-card">
+            <div class="phase-number">Phase 1</div>
+            <h3>Foundation & Telemetry</h3>
+            <p>
+              Docker Compose cluster deployment, Chaos Lab fault injectors, non-LLM statistical Z-score anomaly detector, and initial Slack report dispatch.
+            </p>
+          </div>
+          <div class="roadmap-phase-card">
+            <div class="phase-number">Phase 2</div>
+            <h3>Autonomous AI Triage</h3>
+            <p>
+              Google ADK multi-agent cluster, parallel metrics/logs/changes investigators. Target: accurate root-cause isolation on 4 of 6 chaos faults.
+            </p>
+          </div>
+          <div class="roadmap-phase-card">
+            <div class="phase-number">Phase 3</div>
+            <h3>Adaptive Memory Layer</h3>
+            <p>
+              Supermemory integration for institutional learning, false-positive noise reduction, and recurring incident resolution acceleration.
+            </p>
+          </div>
+          <div class="roadmap-phase-card active-phase">
+            <div class="phase-number">Phase 4</div>
+            <h3>Verification & Delivery</h3>
+            <p>
+              Automated Docker sandbox diff execution, traffic replay test pass validation, GitHub Draft PR generation, and SRE signal approvals.
+            </p>
+          </div>
+        </div>
+
+        <!-- Benchmark Evaluation Matrix -->
+        <div class="benchmark-table-wrapper">
+          <table class="benchmark-table">
+            <thead>
+              <tr>
+                <th>Evaluation Metric</th>
+                <th>Traditional SRE Response</th>
+                <th>Firebreak Autonomous Platform</th>
+                <th>Verification Methodology</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Mean Time to Detect (MTTD)</strong></td>
+                <td class="stat-bad">20+ minutes</td>
+                <td class="stat-good">&lt; 120 seconds</td>
+                <td>Chaos Lab timestamped injection to initial Slack alert</td>
+              </tr>
+              <tr>
+                <td><strong>Mean Time to Resolve (MTTR)</strong></td>
+                <td class="stat-bad">48 minutes average</td>
+                <td class="stat-good">13 minutes average (-73%)</td>
+                <td>Injection onset to 10-minute healthy baseline verification</td>
+              </tr>
+              <tr>
+                <td><strong>False Positive Alert Ratio</strong></td>
+                <td class="stat-bad">High alert fatigue (34%)</td>
+                <td class="stat-good">&lt; 4%</td>
+                <td>Two-stage statistical thresholding before LLM invocation</td>
+              </tr>
+              <tr>
+                <td><strong>Unverified Code Hotfixes</strong></td>
+                <td class="stat-bad">Frequent speculative merges</td>
+                <td class="stat-good">0% (100% verified in Docker)</td>
+                <td>Mandatory ephemeral container test execution against fixtures</td>
+              </tr>
+              <tr>
+                <td><strong>Root-Cause Accuracy</strong></td>
+                <td class="stat-bad">Variable human intuition</td>
+                <td class="stat-good">83.3% (5 of 6 chaos scenarios)</td>
+                <td>Scored against ground-truth chaos fault labels</td>
+              </tr>
+              <tr>
+                <td><strong>Human Governance</strong></td>
+                <td class="stat-bad">Unstructured manual handoffs</td>
+                <td class="stat-good">100% Human Approval Gated</td>
+                <td>Temporal wait conditions prevent autonomous git merges</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==========================================================================
+       NODE INSPECTION DRAWER / MODAL DIALOG
+       ========================================================================== -->
+  <div class="modal-backdrop" id="node-modal" role="dialog" aria-modal="true" aria-labelledby="modal-node-title">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-node-title-group">
+          <div class="modal-node-monogram" id="modal-node-monogram">TP</div>
+          <div>
+            <h3 class="modal-node-title" id="modal-node-title">Temporal Server</h3>
+            <div class="modal-node-subtitle" id="modal-node-subtitle">Workflow Orchestration · Durable Incident State</div>
+          </div>
+        </div>
+        <button class="modal-close-btn" id="modal-close-btn" aria-label="Close dialog">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="spec-grid" id="modal-spec-grid"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" id="modal-dismiss-btn">Close Specification</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       SITE FOOTER & ARCHITECTURAL SUMMARY
+       ========================================================================== -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand-summary">
+          <div class="brand-lockup">
+            <div class="brand-icon">
+              <svg width="20" height="20" viewBox="0 0 64 64" fill="none">
+                <path d="M32 10 L48 18 V34 C48 44 41 51 32 54 C23 51 16 44 16 34 V18 Z" fill="#0E1626" stroke="#FF5C35" stroke-width="3" />
+                <path d="M32 18 C35 23 41 27 41 35 C41 40 37 45 32 45 C27 45 23 40 23 35 C23 30 27 27 29 24 C29 27 30 29 32 29 C30 25 31 21 32 18 Z" fill="#FF5C35" />
+              </svg>
+            </div>
+            <span class="brand-name">Firebreak</span>
+          </div>
+          <p>
+            Autonomous incident remediation and ephemeral patch verification engine. Engineered with Temporal durable workflows, Google ADK multi-agent reasoning, Docker sandbox validation, and Prometheus statistical anomaly detection.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h5>Core Subsystems</h5>
+          <ul class="footer-links">
+            <li><a href="#topology" class="footer-link">Temporal Engine</a></li>
+            <li><a href="#agents" class="footer-link">Google ADK Cluster</a></li>
+            <li><a href="#simulator" class="footer-link">Docker Sandbox</a></li>
+            <li><a href="#stack" class="footer-link">Supermemory Store</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h5>Governance & SRE</h5>
+          <ul class="footer-links">
+            <li><a href="#problem" class="footer-link">Human-in-the-Loop Gate</a></li>
+            <li><a href="#simulator" class="footer-link">Slack Action Signals</a></li>
+            <li><a href="#simulator" class="footer-link">Draft PR Delivery</a></li>
+            <li><a href="#roadmap" class="footer-link">Chaos Lab Ground Truth</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h5>Specifications</h5>
+          <ul class="footer-links">
+            <li><a href="#roadmap" class="footer-link">4-Phase Roadmap</a></li>
+            <li><a href="#stack" class="footer-link">Prometheus & Kepler eBPF</a></li>
+            <li><a href="#stack" class="footer-link">JarvisLabs H100 Compute</a></li>
+            <li><a href="#stack" class="footer-link">PostgreSQL Audit Store</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom-bar">
+        <span>Firebreak Project Specification · Enterprise Grade Architecture</span>
+        <span>Zero autonomous code merges · Strict human approval enforced</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Execution Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
