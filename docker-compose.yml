@@ -2,7 +2,7 @@
 # separate chaos-lab repo; point PROMETHEUS_URL / LOKI_URL at it.
 services:
   postgres:
-    image: postgres:17-alpine
+    image: postgres:16-alpine
     environment:
       POSTGRES_USER: firebreak
       POSTGRES_PASSWORD: firebreak
@@ -14,13 +14,12 @@ services:
       interval: 5s
       retries: 10
 
-  # Temporal dev server (SQLite-backed, persisted to a volume) with the Web UI on :8233.
+  # Temporal dev server with the Web UI on :8233. In-memory: state resets when the container
+  # restarts; the worker recreates detection schedules on startup.
   temporal:
     image: temporalio/temporal:latest
-    command: ['server', 'start-dev', '--ip', '0.0.0.0', '--ui-ip', '0.0.0.0', '--db-filename', '/data/temporal.db']
+    command: ['server', 'start-dev', '--ip', '0.0.0.0', '--ui-ip', '0.0.0.0']
     ports: ['7233:7233', '8233:8233']
-    volumes: [temporaldata:/data]
 
 volumes:
   pgdata:
-  temporaldata:
