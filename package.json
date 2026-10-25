@@ -1,0 +1,57 @@
+{
+  "name": "firebreak",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI incident monitor: statistical detection over Prometheus/Loki, ADK agents for triage and root cause, orchestrated by Temporal.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "dev:worker": "tsx watch src/worker.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "start:worker": "node dist/worker.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "infra:up": "docker compose up -d",
+    "infra:down": "docker compose down"
+  },
+  "dependencies": {
+    "@clerk/express": "^2.1.83",
+    "@google/adk": "^2.3.0",
+    "@google/genai": "^2.31.0",
+    "@slack/web-api": "^8.2.0",
+    "@temporalio/activity": "^1.24.0",
+    "@temporalio/client": "^1.24.0",
+    "@temporalio/common": "^1.24.0",
+    "@temporalio/worker": "^1.24.0",
+    "@temporalio/workflow": "^1.24.0",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.9",
+    "drizzle-orm": "^0.45.4",
+    "express": "^5.3.0",
+    "helmet": "^8.3.0",
+    "openai": "^7.43.0",
+    "pg": "^8.23.1",
+    "pino": "^10.4.0",
+    "pino-http": "^11.0.0",
+    "supermemory": "^5.0.2",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.20.5",
+    "@types/pg": "^8.23.1",
+    "drizzle-kit": "^0.31.11",
+    "pino-pretty": "^13.2.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}

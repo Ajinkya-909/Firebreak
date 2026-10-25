@@ -1,0 +1,26 @@
+# Local dependencies for Firebreak. Prometheus, Loki and the services under test live in the
+# separate chaos-lab repo; point PROMETHEUS_URL / LOKI_URL at it.
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: firebreak
+      POSTGRES_PASSWORD: firebreak
+      POSTGRES_DB: firebreak
+    ports: ['5432:5432']
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U firebreak']
+      interval: 5s
+      retries: 10
+
+  # Temporal dev server (SQLite-backed, persisted to a volume) with the Web UI on :8233.
+  temporal:
+    image: temporalio/temporal:latest
+    command: ['server', 'start-dev', '--ip', '0.0.0.0', '--ui-ip', '0.0.0.0', '--db-filename', '/data/temporal.db']
+    ports: ['7233:7233', '8233:8233']
+    volumes: [temporaldata:/data]
+
+volumes:
+  pgdata:
+  temporaldata:
