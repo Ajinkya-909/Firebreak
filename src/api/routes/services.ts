@@ -25,7 +25,15 @@ servicesRouter.get('/', async (_req, res) => {
 
 servicesRouter.post('/', async (req, res) => {
   const body = serviceBody.parse(req.body);
-  const [service] = await db.insert(schema.services).values(body).returning();
+  const [service] = await db
+    .insert(schema.services)
+    .values(body)
+    .returning()
+    .catch((err: { code?: string; cause?: { code?: string } }) => {
+      // 23505 = unique_violation on services.name (drizzle wraps the pg error in `cause`)
+      if ((err.cause?.code ?? err.code) === '23505') throw new HttpError(409, 'service_exists');
+      throw err;
+    });
   await ensureDetectionSchedule(service!);
   res.status(201).json(service);
 });

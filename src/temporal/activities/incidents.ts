@@ -116,6 +116,23 @@ export interface FinalReport {
   usage: LlmUsage;
 }
 
+// Activities that mark a milestone in the incident; bookkeeping activities are left out.
+const MILESTONES: Record<string, string> = {
+  triageAnomalies: 'Triage started',
+  sendInitialReport: 'Initial report sent',
+  escalateIncident: 'Escalated (no acknowledgement)',
+  investigateIncident: 'Investigation started',
+  verifyFix: 'Fix verification started',
+  isServiceAtBaseline: 'Waiting for metrics to return to baseline',
+  buildFinalReport: 'Recovered; final report prepared',
+};
+
+const SIGNAL_LABELS: Record<string, string> = {
+  anomaly: 'Anomaly received',
+  acknowledge: 'Acknowledged',
+  feedback: 'Feedback received',
+};
+
 /**
  * The workflow history is already a complete, ordered audit log of the incident, so the
  * timeline is derived from it rather than tracked separately.
@@ -127,15 +144,18 @@ async function timelineFromHistory(workflowId: string): Promise<TimelineEntry[]>
   for (const e of history.events ?? []) {
     if (!e.eventTime) continue;
     const at = tsToDate(e.eventTime).toISOString();
+    const activity = e.activityTaskScheduledEventAttributes?.activityType?.name;
+    const signal = e.workflowExecutionSignaledEventAttributes?.signalName;
     if (e.workflowExecutionStartedEventAttributes) entries.push({ at, event: 'Incident opened' });
-    else if (e.activityTaskScheduledEventAttributes?.activityType?.name)
-      entries.push({ at, event: `Started ${e.activityTaskScheduledEventAttributes.activityType.name}` });
+    else if (activity && MILESTONES[activity]) entries.push({ at, event: MILESTONES[activity] });
     else if (e.activityTaskFailedEventAttributes)
-      entries.push({ at, event: `Activity failed: ${e.activityTaskFailedEventAttributes.failure?.message ?? 'unknown'}` });
-    else if (e.workflowExecutionSignaledEventAttributes?.signalName)
-      entries.push({ at, event: `Signal: ${e.workflowExecutionSignaledEventAttributes.signalName}` });
+      entries.push({ at, event: `Step failed: ${e.activityTaskFailedEventAttributes.failure?.message ?? 'unknown'}` });
+    else if (signal) entries.push({ at, event: SIGNAL_LABELS[signal] ?? `Signal: ${signal}` });
   }
-  return entries;
+  // The recovery check runs every minute; keep only its first entry.
+  return entries.filter(
+    (entry, i) => entry.event !== MILESTONES.isServiceAtBaseline || entries.findIndex((x) => x.event === entry.event) === i,
+  );
 }
 
 export async function buildFinalReport(input: {

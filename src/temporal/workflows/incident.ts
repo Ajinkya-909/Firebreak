@@ -43,6 +43,12 @@ const verify = proxyActivities<typeof activities>({
   retry: { maximumAttempts: 2 },
 });
 
+// Memory writes improve future triage but must never fail an incident.
+const memory = proxyActivities<typeof activities>({
+  startToCloseTimeout: '1 minute',
+  retry: { maximumAttempts: 3 },
+});
+
 const MAX_TRACKED_ANOMALIES = 50;
 
 /**
@@ -108,7 +114,9 @@ export async function incidentWorkflow(input: IncidentWorkflowInput): Promise<In
   if (!triage.verdict.isIncident) {
     state.status = 'noise';
     await db.updateIncident(incidentId, { status: 'noise', verdict: triage.verdict, usage: state.usage, anomalyIds: anomalyIds() });
-    await agents.rememberNoise({ incidentId, anomalies: state.anomalies, verdict: triage.verdict });
+    await memory
+      .rememberNoise({ incidentId, anomalies: state.anomalies, verdict: triage.verdict })
+      .catch((err) => log.warn('Failed to remember noise verdict', { error: String(err) }));
     // Stay open as a sink for the same fingerprint, so a persisting harmless pattern isn't
     // re-triaged (and re-billed) every detection cycle.
     await sleep(config.noiseCooldownMs);
@@ -186,6 +194,8 @@ export async function incidentWorkflow(input: IncidentWorkflowInput): Promise<In
     anomalyIds: anomalyIds(),
   });
   await notify.sendFinalReport({ incidentId, slack: state.slack, report });
-  await agents.rememberIncident({ incidentId, report });
+  await memory
+    .rememberIncident({ incidentId, report })
+    .catch((err) => log.warn('Failed to write incident to memory', { error: String(err) }));
   return state;
 }
